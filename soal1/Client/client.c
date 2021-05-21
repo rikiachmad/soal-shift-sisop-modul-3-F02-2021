@@ -151,11 +151,16 @@ void *download(){
 }
 
 void *delete(){
+    read(sock, buffer, 1024);
+    printf("%s", buffer);
 
 }
 
 void *see(){
-
+    bzero(buffer, 1024) ;
+    read(sock, buffer, 1024) ;
+    printf("%s\n", buffer) ;
+    bzero(buffer, 1024) ;
 }
 
 void *find(){
