@@ -10,7 +10,7 @@
 #define M 20
 #define N 6
 
-int matrix1[N][N], matrix2[N][N], (*hasil)[N];
+long long matrix1[N][N], matrix2[N][N], (*hasil)[N];
 pthread_t tid[N];
 
 pid_t child;
@@ -18,13 +18,13 @@ pid_t child;
 
 void *multiply(void *arg){
   pthread_t id = pthread_self();
-	int res;
+	long long res;
 
-  for(int x = 0; x < N; x++){
+  for(long long x = 0; x < N; x++){
     if(pthread_equal(id,tid[x])){
-      for (int i = 0; i < 4; i++) {
+      for (long long i = 0; i < 4; i++) {
         res = 0;
-        for(int j = 0; j < 3; j++)
+        for(long long j = 0; j < 3; j++)
           res += matrix1[i][j]*matrix2[j][x];
 
         hasil[i][x] = res;
@@ -91,26 +91,26 @@ void *multiply(void *arg){
 int main(){
 	key_t key = 1234;
 
-	int shmid = shmget(key, sizeof(int), IPC_CREAT | 0666);
+	long long shmid = shmget(key, sizeof(long long), IPC_CREAT | 0666);
 
-  for(int i=0; i<4; i++)
-    for(int j=0; j<3; j++)
-      scanf("%d", &matrix1[i][j]);
+  for(long long i=0; i<4; i++)
+    for(long long j=0; j<3; j++)
+      scanf("%lld", &matrix1[i][j]);
 
-  for(int i=0; i<3; i++)
-    for(int j=0; j<6; j++)
-      scanf("%d", &matrix2[i][j]);
+  for(long long i=0; i<3; i++)
+    for(long long j=0; j<6; j++)
+      scanf("%lld", &matrix2[i][j]);
 
-	for(int i=0; i<4; i++){
-		for(int j=0; j<3; j++){
-			printf("%3d ", matrix1[i][j]);
+	for(long long i=0; i<4; i++){
+		for(long long j=0; j<3; j++){
+			printf("%lld ", matrix1[i][j]);
 		}
 		printf("\n");
 	}
 	printf("\n");
-	for(int i=0; i<3; i++){
-		for(int j=0; j<6; j++){
-			printf("%3d ", matrix2[i][j]);
+	for(long long i=0; i<3; i++){
+		for(long long j=0; j<6; j++){
+			printf("%lld ", matrix2[i][j]);
 		}
 		printf("\n");
 	}
@@ -128,8 +128,8 @@ int main(){
   // }
 
   hasil =  shmat(shmid,NULL,0);
-	for(int i=0; i<N; i++){
-        int err=pthread_create(&(tid[i]), NULL, &multiply, NULL);
+	for(long long i=0; i<N; i++){
+        long long err=pthread_create(&(tid[i]), NULL, &multiply, NULL);
 
 		if(err!=0)
 		{
@@ -137,14 +137,14 @@ int main(){
 		}
 	}
 
-	for(int i=0; i<N; i++){
+	for(long long i=0; i<N; i++){
 		pthread_join(tid[i], NULL);
 	}
 
-    for(int i=0; i<4; i++){
-        for(int j=0; j<6; j++)
+    for(long long i=0; i<4; i++){
+        for(long long j=0; j<6; j++)
         {
-            printf("%3d ", hasil[i][j]);
+            printf("%lld ", hasil[i][j]);
         }
         printf("\n");
     }
