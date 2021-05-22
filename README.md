@@ -36,6 +36,22 @@ Di dalam proyek itu, Keverk diminta:
   </li>
 </ol>
 
+## Sub Soal a
+
+## Sub Soal b
+
+## Sub Soal c
+
+## Sub Soal d
+
+## Sub Soal e
+
+## Sub Soal f
+
+## Sub Soal g
+
+## Sub Soal h
+
 # Nomor 2
 Crypto (kamu) adalah teman Loba. Suatu pagi, Crypto melihat Loba yang sedang kewalahan mengerjakan tugas dari bosnya. Karena Crypto adalah orang yang sangat menyukai tantangan, dia ingin membantu Loba mengerjakan tugasnya. Detil dari tugas tersebut adalah:
 <ol type="a">
