@@ -33,6 +33,309 @@ Note:
 - Dilarang menggunakan system()
 
 ## Sub Soal a
-Terdapat dua matrix yang dengan ordo 4x3 dan 3x6 yang mana perkalian keduanya akan menghasilkan matriks 4x6.
+Terdapat dua matrix yang dengan ordo 4x3 dan 3x6 yang mana perkalian keduanya akan menghasilkan matriks 4x6. Namun di sini hasil menggunakan array of pointer untuk shared memory.
+```C
+#define N 6
 
+long long matrix1[N][N], matrix2[N][N], (*hasil)[N];
+pthread_t tid[N];
+```
+
+Setelah itu dilakukan input biasa untuk matriks 1 dan 2 serta cetak tiap nilai matriks untuk memastikan nilaninya benar.
+```C
+for (long long i = 0; i < 4; i++)
+    for (long long j = 0; j < 3; j++)
+        scanf("%lld", &matrix1[i][j]);
+
+for (long long i = 0; i < 3; i++)
+    for (long long j = 0; j < 6; j++)
+        scanf("%lld", &matrix2[i][j]);
+
+for (long long i = 0; i < 4; i++)
+{
+    for (long long j = 0; j < 3; j++)
+    {
+        printf("%lld ", matrix1[i][j]);
+    }
+    printf("\n");
+}
+printf("\n");
+for (long long i = 0; i < 3; i++)
+{
+    for (long long j = 0; j < 6; j++)
+    {
+        printf("%lld ", matrix2[i][j]);
+    }
+    printf("\n");
+}
+printf("\n");
+```
+Sebelum melakukan shared memory, perlu untuk mengatur key dan pipe agar dua program mengakses memory yang sama. Kemudian 
+```C
+key_t key = 1234;
+long long shmid = shmget(key, sizeof(long long), IPC_CREAT | 0666);
+
+hasil = shmat(shmid, NULL, 0);
+```
+Sebenarnya tidak ada instruksi untuk membuat thread, namun di sini ada 6 thread untuk melakukan perhitungan perkalian matriks. Sehingga perlu untuk membuat thread terlebih dahulu.
+```C
+for (long long i = 0; i < N; i++)
+{
+    long long err = pthread_create(&(tid[i]), NULL, &multiply, NULL);
+
+    if (err != 0)
+    {
+        printf("\n can't create thread : [%s]", strerror(err));
+    }
+}
+```
+Saat thread dibuat, fungsi multiply juga dipanggil yang mana fungsi/prosedur ini akan menghitung perkaliannya.
+```C
+void *multiply(void *arg)
+{
+    pthread_t id = pthread_self();
+    long long res;
+
+    for (long long x = 0; x < N; x++)
+    {
+        if (pthread_equal(id, tid[x]))
+        {
+            for (long long i = 0; i < 4; i++)
+            {
+                res = 0;
+                for (long long j = 0; j < 3; j++)
+                    res += matrix1[i][j] * matrix2[j][x];
+
+                hasil[i][x] = res;
+            }
+        }
+    }
+}
+```
+`id` merupakan id dari thread untuk menyaring agar thread bekerja pada tempat yang ditentukan. Di sini karena terdapat 6 thread, maka tiap thread akan mengisi kolom tiap baris i. Hasil perkalian matriks merupakan penjumlahan baris matriks1 x kolom matriks2. Dalam hal ini penjumlahan tersebut disimpan pada variabel res. Setelah itu hasil perkalian disimpan pada array `hasil`.
+
+Setelah selesai, gabungkan kembali semua thread yang telah dibuat. Namun tunggu program selama beberapa saat sembari menjalankan program lain (yang ingin mengakses shared memory) serta cetak hasil perkaliannya.
+```C
+for (long long i = 0; i < N; i++)
+{
+    pthread_join(tid[i], NULL);
+}
+
+for (long long i = 0; i < 4; i++)
+{
+    for (long long j = 0; j < 6; j++)
+    {
+        printf("%lld ", hasil[i][j]);
+    }
+    printf("\n");
+}
+
+sleep(5);
+shmdt(hasil);
+shmctl(shmid, IPC_RMID, NULL);
+```
+## Sub soal 2b
+Sub soal ini diharuskan menggunakan hasil perkalian matriks sebelumnya, sehingga perlu membuat variabel dengan kriteria sama. Agar mudah akan sama persis.
+```C
+#define row 4
+#define col 6
+
+long long (*hasil)[col], faktorial[row][col], matrixB[row][col];
+
+pthread_t tid[row * col];
+```
+Karena ingin mengakses memory yang sama, maka perlu konfigurasi yang sama dengan sebelumnya.
+```C
+key_t key = 1234;
+
+long long shmid = shmget(key, sizeof(long long), IPC_CREAT | 0666);
+hasil = shmat(shmid, NULL, 0);
+```
+Untuk memastikan bahwa akses berhasil, cetak semua nilai dari hasil.
+```C
+for (long long i = 0; i < row; i++)
+{
+    for (long long j = 0; j < col; j++)
+    {
+        printf("%lld ", hasil[i][j]);
+    }
+    printf("\n");
+}
+printf("\n");
+```
+Lalu input nilai sesuai soal.
+```C
+    for (long long i = 0; i < row; i++)
+        for (long long j = 0; j < col; j++)
+            scanf("%lld", &matrixB[i][j]);
+```
+Diperintahkan juga untuk menggunakan thread tiap sel, sehingga ada 24 thread yang akan dibuat.
+```C
+for (long long i = 0; i < row * col; i++)
+{
+    long long err = pthread_create(&(tid[i]), NULL, &fac, NULL);
+    if (err != 0)
+    {
+        printf("\n can't create thread");
+    }
+}
+```
+`fac()` merupakan fungsi untuk menghitung faktorial sesuai perintah soal. Karena terdapat 24 thread, maka id akan diidentifikasi sebagai `col * i + j`:
+ ```
+1   2   3   4   5   6
+7   8   9   10  11  12
+13  14  15  16  17  18
+19  20  21  22  23  24
+```
+Tiap sel akan dihitung dari `hasil[i][j]` sampai `min(hasil[i][j], matrixB[i][j]` sesuai soal.
+```C
+void *fac(void *p)
+{
+    pthread_t id = pthread_self();
+
+    for (long long i = 0; i < row; i++)
+    {
+        for (long long j = 0; j < col; j++)
+        {
+            if (pthread_equal(id, tid[col * i + j]))
+            {
+                if (matrixB[i][j] == 0 || hasil[i][j] == 0)
+                {
+                    faktorial[i][j] = 0;
+                }
+                else
+                {
+                    faktorial[i][j] = 1;
+                    for (long long k = 0; k < min(hasil[i][j], matrixB[i][j]); k++)
+                    {
+                        faktorial[i][j] *= (hasil[i][j] - k);
+                    }
+                }
+            }
+        }
+    }
+}
+```
+Setelah perhitungan faktorial selesai, gabungkan thread dan cetak nilai tiap sel untuk memastikan bahwa nilainya benar.
+```C
+for (long long i = 0; i < row * col; i++)
+{
+    pthread_join(tid[i], NULL);
+}
+
+for (long long i = 0; i < row; i++)
+{
+    for (long long j = 0; j < col; j++)
+    {
+        printf("%lld ", faktorial[i][j]);
+    }
+    printf("\n");
+}
+sleep(5);
+shmctl(shmid, IPC_RMID, NULL);
+```
+## Sub soal 2c
+Terdapat 3 perintah dengan pipe, sehingga buat 2 pipe dan 3 fungsi untuk masing-masing perintah.
+```C
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+
+int pid;
+int pipe1[2];
+int pipe2[2];
+
+void exec1();
+void exec2();
+void exec3();
+```
+Buat pipe terlebih dahulu, jika gagal, batalkan program dengan `exit(1)`. Kemudian buat proses baru dengan fork. Jika berhasil, panggil fungsi pertama yaitu untuk `ps aux`.
+```C
+if (pipe(pipe1) == -1)
+{
+    perror("bad pipe1");
+    exit(1);
+}
+
+if ((pid = fork()) == -1)
+{
+    exit(1);
+}
+else if (pid == 0)
+{
+    exec1();
+}
+```
+```C
+void exec1()
+{
+    // output to pipe1
+    dup2(pipe1[1], 1);
+
+    close(pipe1[0]);
+    close(pipe1[1]);
+    // exec
+    execlp("ps", "ps", "aux", NULL);
+    _exit(1);
+}
+```
+Kemudian buat juga pipe2 dan buat proses baru untuk perintah sort serta tutup pipe1 setelah digunakan untuk perintah kedua.
+```C
+if (pipe(pipe2) == -1)
+{
+    perror("bad pipe2");
+    exit(1);
+}
+
+if ((pid = fork()) == -1)
+{
+    exit(1);
+}
+else if (pid == 0)
+{
+    exec2();
+}
+```
+```C
+void exec2()
+{
+    // input from pipe1
+    dup2(pipe1[0], 0);
+    // output to pipe2
+    dup2(pipe2[1], 1);
+
+    close(pipe1[0]);
+    close(pipe1[1]);
+    close(pipe2[0]);
+    close(pipe2[1]);
+
+    execlp("sort", "sort", "-nrk", "3,3", NULL);
+    _exit(1);
+}
+```
+Terakhir dapat dibuat langsung proses baru.
+```C
+if ((pid = fork()) == -1)
+{
+    exit(1);
+}
+else if (pid == 0)
+{
+    exec3();
+}
+```
+```C
+void exec3()
+{
+    // input from pipe2
+    dup2(pipe2[0], 0);
+
+    close(pipe2[0]);
+    close(pipe2[1]);
+
+    execlp("head", "head", "-5", NULL);
+
+    _exit(1);
+}
+```
 # Nomor 3
