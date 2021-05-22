@@ -134,6 +134,8 @@ sleep(5);
 shmdt(hasil);
 shmctl(shmid, IPC_RMID, NULL);
 ```
+![image](https://user-images.githubusercontent.com/45300477/119212449-916ac180-bae2-11eb-8290-5a161fc27cfb.png)
+
 ## Sub soal 2b
 Sub soal ini diharuskan menggunakan hasil perkalian matriks sebelumnya, sehingga perlu membuat variabel dengan kriteria sama. Agar mudah akan sama persis.
 ```C
@@ -234,6 +236,8 @@ for (long long i = 0; i < row; i++)
 sleep(5);
 shmctl(shmid, IPC_RMID, NULL);
 ```
+![image](https://user-images.githubusercontent.com/45300477/119212475-c8d96e00-bae2-11eb-8562-8c7eaffcc9cf.png)
+
 ## Sub soal 2c
 Terdapat 3 perintah dengan pipe, sehingga buat 2 pipe dan 3 fungsi untuk masing-masing perintah.
 ```C
@@ -338,4 +342,6 @@ void exec3()
     _exit(1);
 }
 ```
+![image](https://user-images.githubusercontent.com/45300477/119212499-05a56500-bae3-11eb-93fa-29309195e327.png)
+
 # Nomor 3
