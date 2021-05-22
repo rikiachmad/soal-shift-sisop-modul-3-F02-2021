@@ -133,7 +133,7 @@ void write_file(char path[]){
 }
 
 void* add(){
-    char pathFile[200], publisher[100], year[100];
+    char pathFile[200], publisher[100], year[100], fileName[100];
     strcpy(buffer, "Publisher: \n");
     send(sd, buffer, strlen(buffer), 0);
     bzero(buffer, 1024);
@@ -150,8 +150,9 @@ void* add(){
     strcpy(buffer, "Filepath: \n");
     send(sd, buffer, strlen(buffer), 0);
     bzero(buffer, 1024);
-    read(sd, buffer, 1024) ;
+    read(sd, buffer, 1024);
     strcpy(pathFile, buffer);
+    strcpy(fileName, buffer);
     char temp[400];
     strcpy(temp, pathFile);
     strcat(temp, "\t");
@@ -189,9 +190,9 @@ void* add(){
     send(sd, buffer, strlen(buffer), 0);
     bzero(buffer, 1024);
  
-    // FILE* log = fopen("running.log", "a");
-    // fprintf(log, "Tambah : %s %s\n", fileName, user);
-    // fclose(log) ;
+    FILE* log = fopen("running.log", "a");
+    fprintf(log, "Tambah : %s %s\n", fileName, user);
+    fclose(log);
 }
 
 char* secondWord(char str[], char inputCpy[]){
@@ -306,6 +307,9 @@ void *delete(){
         strcpy(buffer, "Delete Success\n");
         send(sd, buffer, strlen(buffer), 0);
         bzero(buffer, 1024);
+        FILE* log = fopen("running.log", "a") ;
+        fprintf(log, "Hapus : %s %s\n", second, user) ;
+        fclose(log) ;
         free(inputCopy);
     }
 }
@@ -357,7 +361,7 @@ void *see(){
     int i = 0;
     while(fgets(line, 1024, file)) {
         if (i) strcat(buffer, "\n\n");
-        tab(line, publisher, year, path);
+        tab(line, path, publisher, year);
         strcpy(savePath, path);
         slash(path, fileName);
         dot(fileName, name, extension);
@@ -376,9 +380,61 @@ void *see(){
     send(sd, buffer, strlen(buffer), 0);
     bzero(buffer, 1024);
 }
-
 void *find(){
+    if(strcmp(buffer, "find")==0) {
+        strcpy(buffer, "Enter file name!\n");
+        send(sd, buffer, strlen(buffer), 0);
+        bzero(buffer, 1024);
+    }
+    else {
+        char *inputCopy = malloc(255 * sizeof(char));
+        char *second = secondWord(buffer, inputCopy);
+        FILE* file = fopen("files.tsv", "r");
+        char line[1024];
+        char publisher[255] = {0};
+        char year[10] = {0};
+        char path[511] = {0};
+        char fileName[63] = {0};
+        char name[50] = {0};
+        char extension[10] = {0};
+        char savePath[511] = {0};
+        bzero(buffer, 1024);
+        
+        int i = 0;
+        while(fgets(line, 1024, file)) {
+                
+            tab(line, path, publisher, year);
+            strcpy(savePath, path);
+            slash(path, fileName);
+            dot(fileName, name, extension);
 
+            char searchName[63], searchExt[10];
+            dot(second, searchName, searchExt);
+            if (!strstr(name, searchName)) continue;
+
+            if (i) 
+                strcat(buffer, "\n\n");
+
+            strcat(buffer, "Nama: ");
+            strcat(buffer, name);
+            strcat(buffer, "\nPublisher: "); 
+            strcat(buffer, publisher);
+            strcat(buffer, "\nTahun publishing: ");
+            strcat(buffer, year);
+            strcat(buffer, "\nEkstensi file: ");
+            strcat(buffer, extension);
+            strcat(buffer, "\nFile path: ");
+            strcat(buffer, savePath);
+            i++;
+        }
+
+        if (!i) {
+            strcpy(buffer, "File not found\n");
+        }
+        send(sd, buffer, strlen(buffer), 0);
+        bzero(buffer, 1024);
+        free(inputCopy);
+    }
 }
 
 int main(int argc, char const *argv[]) {
