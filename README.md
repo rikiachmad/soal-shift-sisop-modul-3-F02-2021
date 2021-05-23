@@ -37,6 +37,114 @@ Di dalam proyek itu, Keverk diminta:
 </ol>
 
 ## Sub Soal a
+Pada sub soal a, diminta untuk membuat sebuah sistem untuk login dan registrasi bagi client. pada source code yang tertera, hal ini terdapat pada fungsi regist dan login dimana fungsi regist berfungsi untuk proses registrasi dan fungsi login berfungsi untuk proses login. 
+Server:
+```C
+void* regist(){
+    bzero(buffer, 1024);
+    strcpy(buffer, "SignUp\nEnter New Id:\n");
+    send(sd, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sd, buffer, 1024);
+    char id[50];
+    strcpy(id, buffer);
+    strcpy(buffer, "Enter Password:\n");
+    send(sd, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sd, buffer, 1024);
+    char pass[50];
+    strcpy(pass, buffer);
+
+    char acc[50];
+    sprintf(acc, "%s:%s\n",id, pass);
+    update(acc);
+    strcpy(buffer, "Registration Success. You may now login with your account.\n");
+    send(sd, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024) ;
+}
+```
+```C
+void* login(){
+    bzero(buffer, 1024);
+    strcpy(buffer, "Enter Id:\n");
+    send(sd, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sd, buffer, 1024);
+    char id[50];
+    strcpy(id, buffer);
+    strcpy(buffer, "Enter Password:\n");
+    send(sd, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sd, buffer, 1024);
+    char pass[50];
+    strcpy(pass, buffer);
+    char acc[50];
+    sprintf(acc, "%s:%s\n",id, pass);
+    if(checkCreds(acc)>0){
+        strcpy(buffer, "Login Success\n");
+        send(sd, buffer, strlen(buffer), 0);
+        status = 1;
+        sprintf(user, "(%s:%s)", id, pass);
+    }else{
+        strcpy(buffer, "Wrong Id or Password. Please Try Again.\n");
+        send(sd, buffer, strlen(buffer), 0);
+    }
+    bzero(buffer, 1024);
+}  
+```
+Client :
+```C
+void* regist(){
+    read(sock, buffer, 1024);
+    printf("%s", buffer);
+    bzero(buffer, 1024);
+    scanf(" %s", buffer) ;
+    send(sock, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sock, buffer, 1024);
+    printf("%s", buffer);
+    memset(buffer, 0, 1024) ;
+    scanf(" %s", buffer) ;
+    send(sock, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sock, buffer, 1024);
+    printf("%s", buffer);
+    if(strcmp(buffer, "Login Success\n")==0){
+        status=1;
+    }
+    bzero(buffer, 1024);
+}
+```
+```C
+// regist dan Login
+void* regist(){
+    read(sock, buffer, 1024);
+    printf("%s", buffer);
+    bzero(buffer, 1024);
+    scanf(" %s", buffer) ;
+    send(sock, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sock, buffer, 1024);
+    printf("%s", buffer);
+    memset(buffer, 0, 1024) ;
+    scanf(" %s", buffer) ;
+    send(sock, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sock, buffer, 1024);
+    printf("%s", buffer);
+    if(strcmp(buffer, "Login Success\n")==0){
+        status=1;
+    }
+    bzero(buffer, 1024);
+}
+```
+![image](https://user-images.githubusercontent.com/74702068/119250945-c738a480-bbcd-11eb-9590-b8de235c9dcf.png)
+
+credential dari akun-akun yang telah tersimpan akan disimpan dalam file Akun.txt.
+![image](https://user-images.githubusercontent.com/74702068/119250952-d61f5700-bbcd-11eb-916a-2008fe2611b7.png)
+
+
+Sistem ini juga dapat menerima multi-connection, dimana jika terdapat lebih dari 1 koneksi client yang terhubung pada server maka client yang baru masuk harus menunggu hingga tidak ada client yang terhubung untuk bisa dapat mengakses command-command pada sistem.
 
 ## Sub Soal b
 
