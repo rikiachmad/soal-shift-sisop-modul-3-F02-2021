@@ -377,3 +377,8 @@ void exec3()
 ![image](https://user-images.githubusercontent.com/45300477/119212499-05a56500-bae3-11eb-93fa-29309195e327.png)
 
 # Nomor 3
+Seorang mahasiswa bernama Alex sedang mengalami masa gabut. Di saat masa gabutnya, ia memikirkan untuk merapikan sejumlah file yang ada di laptopnya. Karena jumlah filenya terlalu banyak, Alex meminta saran ke Ayub. Ayub menyarankan untuk membuat sebuah program C agar file-file dapat dikategorikan. Program ini akan memindahkan file sesuai ekstensinya ke dalam folder sesuai ekstensinya yang folder hasilnya terdapat di working directory ketika program kategori tersebut dijalankan.
+Jika program dijalankan, program dapat:
+1. Menerima argumen ``` -f ``` untuk mengkategorikan file. ``` cmd$ ./soal3 -f path/to/file1.jpg path/to/file2.zip path/to/file2/c```
+2. Menerima argumen ``` -d ``` untuk mengakategorikan file yang terdapat dalam directory. ``` $ ./soal3 -d /path/to/directory/```
+3. Menerima argumen ``` * ``` untuk mengkategorikan file yang berada pada working directory. ``` $ ./soal3 \* ```
