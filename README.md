@@ -280,6 +280,97 @@ Folder FILES setelah client menggunakan comman add.
 files.tsv setelah client menggunakan command add.
 
 ## Sub Soal d
+Sub soal d meminta untuk menambahkan sebuah command baru ke dalam sistem yaitu command "download". Command donwload ini digunakan untuk mendownload sebuah file yang telah ada pada folder FILES dan files.tsv pada server. File yang telah di download dari folder server akan di copy ke dalam folder client.
+Server:
+```C
+void *download(){
+    if(strcmp(buffer, "download")==0){
+        strcpy(buffer, "Enter file name!\n");
+        send(sd, buffer, strlen(buffer), 0);
+        bzero(buffer, 1024);
+    }
+    else{
+        char *inputCopy = malloc(255 * sizeof(char));
+        char *second = secondWord(buffer, inputCopy);
+
+        int exist = 0;
+        char path[400];
+        strcpy(path, serverPath);
+        strcat(path, "FILES/");
+        strcat(path, second);
+        char data[200];
+        FILE *opfile = fopen("files.tsv", "rb");
+        while(fgets(data, 200, opfile) != NULL) {
+            char *input = malloc(255 * sizeof(char));
+            char *first = firstWord(data, input);
+            free(input);
+            if(strcmp(first, path)==0) {
+                exist = 1;
+                break;
+            }
+            bzero(data, 200);
+        }
+        fclose(opfile);
+        if(exist==0){
+            strcpy(buffer, "File not found!\n");
+            send(sd, buffer, strlen(buffer), 0);
+            bzero(buffer, 1024);
+        }
+        else{
+            char temp[200];
+            strcpy(temp, "FILES/");
+            strcat(temp, second);
+            printf("%s\n", temp);
+            int sz;
+            FILE *fp = fopen(temp, "rb");
+            if (fp == NULL) {
+                perror("[-]Error in reading file.");
+                exit(1);
+            }
+            
+            while(fgets(data, 200, fp) != NULL) {
+                if (send(sd, data, strlen(data), 0) == -1) {
+                    perror("[-]Error in sending file.");
+                    exit(1);
+                }
+                bzero(data, 200);
+            }
+            fclose(fp);
+            printf("Filesent!\n");
+        }
+        free(inputCopy);
+    }
+}
+```
+
+Client:
+```C
+void *download(){
+    char *inputCopy = malloc(255 * sizeof(char));
+    char *second = secondWord(query, inputCopy);
+    read(sock, buffer, 1024);
+    if(strcmp(buffer, "Enter file name!\n")==0 || strcmp(buffer, "File not found!\n")==0){
+        printf("%s", buffer);
+    }
+    else{
+        char temp[300];
+        strcpy(temp, clientPath);
+        strcat(temp, second);
+        FILE* filee = fopen(temp, "w");
+        fprintf(filee, "%s", buffer);
+        fclose(filee);
+        printf("File Download Success!\n");
+    }
+    free(inputCopy);
+}
+```
+Diatas merupakan sebuah fungsi untuk download pada server dan client.
+
+![image](https://user-images.githubusercontent.com/74702068/119253899-7a5cca00-bbdd-11eb-9be7-2265d1318ba8.png)
+Contoh penggunaan command download.
+
+![image](https://user-images.githubusercontent.com/74702068/119253911-89437c80-bbdd-11eb-91f4-8cb8c0645f5a.png)
+Hasil setelah download sebuah file dari server.
 
 ## Sub Soal e
 
