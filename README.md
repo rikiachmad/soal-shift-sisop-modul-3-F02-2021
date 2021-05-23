@@ -160,7 +160,124 @@ Gambar untuk files.tsv
 Gambar untuk folder FILES.
 
 ## Sub Soal c
-Pada sub soal c ini 
+Pada sub soal c ini diminta untuk membuat sebuah command "Add" yang berfungsi untuk menambahkan sebuah file dari client ke server. Command Add hanya bisa digunakan pada client yang telah login. Pada saat client mengetikkan commmand add maka akan muncul sebuah input berdasarkan format yang diminta soal untuk menambahkan file dari client ke server. Apabila terdapat sebuah file baru yang ditambahkan ke dalam server, maka file "files.tsv" juga akan di update berdasarkan input client. Folder FILES pada server juga akan diupdate berdasarkan file yang dikirimkan dari client.
+Server: 
+```C
+void* add(){
+    char pathFile[200], publisher[100], year[100], fileName[100];
+    strcpy(buffer, "Publisher: \n");
+    send(sd, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sd, buffer, 1024) ;
+    strcpy(publisher, buffer);
+ 
+    strcpy(buffer, "Tahun Publish: \n");
+    send(sd, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sd, buffer, 1024) ;
+ 
+    strcpy(year, buffer);
+ 
+    strcpy(buffer, "Filepath: \n");
+    send(sd, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sd, buffer, 1024);
+    strcpy(pathFile, buffer);
+    strcpy(fileName, buffer);
+    char temp[400];
+    strcpy(temp, pathFile);
+    strcat(temp, "\t");
+    strcat(temp, publisher);
+    strcat(temp, "\t");
+    strcat(temp, year);
+    
+    char temp2[400];
+    strcpy(temp2, serverPath);
+    strcat(temp2, "FILES/");
+    strcat(temp2, temp);
+    strcat(temp2, "\n");
+ 
+    FILE* file = fopen("files.tsv", "a");
+    fputs(temp2, file);
+    fclose(file);
+ 
+    char path[50];
+    strcpy(path, serverPath); 
+    strcat(path, "FILES/"); 
+    strcat(path, buffer);
+ 
+    FILE* filee = fopen(path, "w") ;
+
+    bzero(buffer, 1024);
+    read(sd, buffer, 1024);
+    fprintf(filee, "%s", buffer);
+    fclose(filee);
+    printf("[+]Data written in the file successfully.\n");
+
+
+    bzero(buffer, 1024) ;
+ 
+    strcpy(buffer, "Add Success\n");
+    send(sd, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+ 
+    FILE* log = fopen("running.log", "a");
+    fprintf(log, "Tambah : %s %s\n", fileName, user);
+    fclose(log);
+}
+```
+
+Client:
+```C
+void* add(){
+    bzero(buffer, 1024);
+    read(sock, buffer, 1024) ;
+    printf("%s", buffer);
+    bzero(buffer, 1024);
+    scanf(" %s", buffer) ;
+    send(sock, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sock, buffer, 1024) ;
+    printf("%s", buffer);
+    bzero(buffer, 1024);
+    scanf(" %s", buffer) ;
+    send(sock, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+    read(sock, buffer, 1024) ;
+    printf("%s", buffer);
+    bzero(buffer, 1024);
+    scanf(" %s", buffer);
+    while(access(buffer, F_OK ) != 0){
+        printf("File doesn't exist! Please try again.\n");
+        bzero(buffer, 1024);
+        scanf(" %s", buffer);
+    }
+    send(sock, buffer, strlen(buffer), 0);
+     
+    FILE *fp = fopen(buffer, "rb");
+    if (fp == NULL) {
+    perror("[-]Error in reading file.");
+    exit(1);
+  }
+
+    send_file(fp);
+    printf("[+]File data sent successfully.\n");
+    
+    read(sock, buffer, 1024);
+    printf("%s\n", buffer);
+    bzero(buffer, 1024);
+}
+```
+![image](https://user-images.githubusercontent.com/74702068/119253557-00781100-bbdc-11eb-9bc8-4714c10a946f.png)
+Contoh file tes.txt dari client yang akan dikirimkan menggunakan command add ke server.
+
+![image](https://user-images.githubusercontent.com/74702068/119253590-269db100-bbdc-11eb-8bdd-b7d20560fc9a.png)
+contoh penggunaan command Add.
+![image](https://user-images.githubusercontent.com/74702068/119253609-3f0dcb80-bbdc-11eb-827f-b2c8ee4c22f1.png)
+Folder FILES setelah client menggunakan comman add.
+
+![image](https://user-images.githubusercontent.com/74702068/119253629-52209b80-bbdc-11eb-9ff6-c8690bb15a1b.png)
+files.tsv setelah client menggunakan command add.
 
 ## Sub Soal d
 
