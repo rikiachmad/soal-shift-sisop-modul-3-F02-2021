@@ -160,6 +160,7 @@ Gambar untuk files.tsv
 Gambar untuk folder FILES.
 
 ## Sub Soal c
+Pada sub soal c ini 
 
 ## Sub Soal d
 
