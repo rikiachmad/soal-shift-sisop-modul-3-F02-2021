@@ -147,6 +147,17 @@ credential dari akun-akun yang telah tersimpan akan disimpan dalam file Akun.txt
 Sistem ini juga dapat menerima multi-connection, dimana jika terdapat lebih dari 1 koneksi client yang terhubung pada server maka client yang baru masuk harus menunggu hingga tidak ada client yang terhubung untuk bisa dapat mengakses command-command pada sistem.
 
 ## Sub Soal b
+Sub soal b meminta untuk membuat sebuah file dengan nama "files.tsv" dimana files.tsv ini akan menampung file-file yang berada pada folder Server. ketika terdapat penambahan atau penghapusan file pada folder server, maka hal ini juga akan mempengaruhi files.tsv. Dan untuk file-file nya sendiri akan tersimpan pada folder FILES.
+```C
+FILE *fp = fopen("files.tsv", "ab+");
+mkdir("FILES",0777);
+fclose(fp);
+```
+![image](https://user-images.githubusercontent.com/74702068/119251037-6cec1380-bbce-11eb-85ee-f429054cc49f.png)
+Gambar untuk files.tsv
+
+![image](https://user-images.githubusercontent.com/74702068/119251047-842b0100-bbce-11eb-9f7f-479dc797c0d3.png)
+Gambar untuk folder FILES.
 
 ## Sub Soal c
 
