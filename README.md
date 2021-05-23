@@ -443,10 +443,146 @@ files.tsv setelah penggunaan command delete.
 Folder FILES setelah penggunaan command delete.
 
 ## Sub Soal f
+Untuk sub soal f diminta untuk menambahkan command baru yaitu "see". Command see berguna untuk menampilkan seluruh isi files.tsv sesuai dengan format yang telah diberikan oleh soal. Berikut Source code untuk server dan Client.
+Server:
+```C
+void *see(){
+    FILE* file = fopen("files.tsv", "r");
+    char line[1024];
+    char publisher[255] = {0};
+    char year[10] = {0};
+    char path[511] = {0};
+    char fileName[63] = {0};
+    char name[50] = {0};
+    char extension[10] = {0};
+    char savePath[511] = {0};
+    bzero(buffer, 1024);
+    int i = 0;
+    while(fgets(line, 1024, file)) {
+        if (i) strcat(buffer, "\n\n");
+        tab(line, path, publisher, year);
+        strcpy(savePath, path);
+        slash(path, fileName);
+        dot(fileName, name, extension);
+        strcat(buffer, "Nama: ");
+        strcat(buffer, name);
+        strcat(buffer, "\nPublisher: ");
+        strcat(buffer, publisher);
+        strcat(buffer, "\nTahun publishing: ");
+        strcat(buffer, year);
+        strcat(buffer, "\nEkstensi file: "); 
+        strcat(buffer, extension) ;
+        strcat(buffer, "\nFile path: ");
+        strcat(buffer, savePath);
+        i++;
+    }
+    send(sd, buffer, strlen(buffer), 0);
+    bzero(buffer, 1024);
+}
+```
+
+Client:
+```C
+void *see(){
+    bzero(buffer, 1024) ;
+    read(sock, buffer, 1024) ;
+    printf("%s\n", buffer) ;
+    bzero(buffer, 1024) ;
+}
+```
+![image](https://user-images.githubusercontent.com/74702068/119254427-73838680-bbe0-11eb-832a-a9f4411f9ab7.png)
+Contoh penggunaan command see.
 
 ## Sub Soal g
+Pada sub soal g diminta untuk menambahkan sebuah command baru yaitu find. Penggunaan command find adalah "find TEMP.ext". Command find berguna untuk menampilkan seluruh files yang ada pada files.tsv dimana nama file nya mengandung string sesuai argumen kedua dari command.
+Berikut source code untuk server dan client.
+Server:
+```C
+void *find(){
+    if(strcmp(buffer, "find")==0) {
+        strcpy(buffer, "Enter file name!\n");
+        send(sd, buffer, strlen(buffer), 0);
+        bzero(buffer, 1024);
+    }
+    else {
+        char *inputCopy = malloc(255 * sizeof(char));
+        char *second = secondWord(buffer, inputCopy);
+        FILE* file = fopen("files.tsv", "r");
+        char line[1024];
+        char publisher[255] = {0};
+        char year[10] = {0};
+        char path[511] = {0};
+        char fileName[63] = {0};
+        char name[50] = {0};
+        char extension[10] = {0};
+        char savePath[511] = {0};
+        bzero(buffer, 1024);
+        
+        int i = 0;
+        while(fgets(line, 1024, file)) {
+                
+            tab(line, path, publisher, year);
+            strcpy(savePath, path);
+            slash(path, fileName);
+            dot(fileName, name, extension);
+
+            char searchName[63], searchExt[10];
+            dot(second, searchName, searchExt);
+            if (!strstr(name, searchName)) continue;
+
+            if (i) 
+                strcat(buffer, "\n\n");
+
+            strcat(buffer, "Nama: ");
+            strcat(buffer, name);
+            strcat(buffer, "\nPublisher: "); 
+            strcat(buffer, publisher);
+            strcat(buffer, "\nTahun publishing: ");
+            strcat(buffer, year);
+            strcat(buffer, "\nEkstensi file: ");
+            strcat(buffer, extension);
+            strcat(buffer, "\nFile path: ");
+            strcat(buffer, savePath);
+            i++;
+        }
+
+        if (!i) {
+            strcpy(buffer, "File not found\n");
+        }
+        send(sd, buffer, strlen(buffer), 0);
+        bzero(buffer, 1024);
+        free(inputCopy);
+    }
+}
+```
+
+Client:
+```C
+void *find(){
+    bzero(buffer, 1024) ;
+    read(sock, buffer, 1024) ;
+    printf("%s\n", buffer) ;
+    bzero(buffer, 1024) ;
+}
+
+```
+![image](https://user-images.githubusercontent.com/74702068/119254545-11775100-bbe1-11eb-9e88-5c79dc9cd9b6.png)
+Contoh penggunaan command find.
 
 ## Sub Soal h
+Pada sub soal yang terkahir ini dimita untuk membuat sebuah file running.log yang berisi log untuk command add dan delete sesuai dengan format yang diminta soal.
+Berikut source code nya.
+Server:
+```C
+  FILE* log = fopen("running.log", "a");
+  fprintf(log, "Tambah : %s %s\n", fileName, user);
+  fclose(log);
+```
+source code diatas digunakan tiap-tiap selesai melakukan penambahan atau penghapusan.
+
+![image](https://user-images.githubusercontent.com/74702068/119254635-9b271e80-bbe1-11eb-9111-6013dc5ff99a.png)
+![image](https://user-images.githubusercontent.com/74702068/119254643-a4b08680-bbe1-11eb-9f09-1b76a0a8e4bd.png)
+Contoh pengupdate an running log setelah command add dan delete.
 
 # Nomor 2
 Crypto (kamu) adalah teman Loba. Suatu pagi, Crypto melihat Loba yang sedang kewalahan mengerjakan tugas dari bosnya. Karena Crypto adalah orang yang sangat menyukai tantangan, dia ingin membantu Loba mengerjakan tugasnya. Detil dari tugas tersebut adalah:
