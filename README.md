@@ -373,6 +373,74 @@ Contoh penggunaan command download.
 Hasil setelah download sebuah file dari server.
 
 ## Sub Soal e
+Pada sub soal e meminta untuk menambahkan sebuah command baru yaitu delete. Delete berguna untuk mengahapus sebuah file yang berada pada server. Pada saat sebuah file dihapus dari server, maka catatan file tersebut yang berada pada files.tsv juga akan dihapus. Namun file asli yang berada di folder FILES di server tidak dihapus melainkan namanya hanya diganti Old-NamaFile.
+Server: 
+```C
+void *delete(){
+    if(strcmp(buffer, "delete")==0){
+        strcpy(buffer, "Enter file name!\n");
+        send(sd, buffer, strlen(buffer), 0);
+        bzero(buffer, 1024);
+    }else{
+        char *inputCopy = malloc(255 * sizeof(char));
+        char *second = secondWord(buffer, inputCopy);
+        int exist = 0;
+        char path[400];
+        strcpy(path, serverPath);
+        strcat(path, "FILES/");
+        strcat(path, second);
+        char data[400];
+        FILE *opfile = fopen("files.tsv", "rb");
+        FILE* filee = fopen("tmp.tsv", "w");
+        char temp[500];
+        while(fgets(data, 400, opfile)) {
+            char *input = malloc(255 * sizeof(char));
+            char *first = firstWord(data, input);
+            if(strcmp(first, path)) {
+                fprintf(filee, "%s", data);
+            }
+            free(input);
+            bzero(data, 200);
+        }
+        fclose(opfile);
+        fclose(filee);
+        remove("files.tsv");
+        rename("tmp.tsv", "files.tsv");
+
+        char new[100] ;
+        strcpy(new, serverPath);
+        strcat(new, "FILES/old-");
+        strcat(new, second);
+
+        rename(path, new);
+
+        strcpy(buffer, "Delete Success\n");
+        send(sd, buffer, strlen(buffer), 0);
+        bzero(buffer, 1024);
+        FILE* log = fopen("running.log", "a") ;
+        fprintf(log, "Hapus : %s %s\n", second, user) ;
+        fclose(log) ;
+        free(inputCopy);
+    }
+}
+```
+
+Client:
+```C
+void *delete(){
+    read(sock, buffer, 1024);
+    printf("%s", buffer);
+}
+```
+Source Code untuk server dan client.
+![image](https://user-images.githubusercontent.com/74702068/119254308-cc065400-bbdf-11eb-952e-468e3bc9019f.png)
+Contoh penggunaan command delete.
+
+![image](https://user-images.githubusercontent.com/74702068/119254327-e809f580-bbdf-11eb-90c3-66026f0905e7.png)
+files.tsv setelah penggunaan command delete.
+
+![image](https://user-images.githubusercontent.com/74702068/119254354-053ec400-bbe0-11eb-9a32-51d357bfebb8.png)
+Folder FILES setelah penggunaan command delete.
 
 ## Sub Soal f
 
